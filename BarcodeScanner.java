@@ -20,6 +20,7 @@ class BarcodeScanner {
     public int height;
     public int bitdept;
 
+    public String foundcode;
     public String[][] barcodetable;
     private List<Integer> codewidth;
     private List<Integer> codecolor;
@@ -74,13 +75,14 @@ class BarcodeScanner {
 
     public void findBarcode(){
         if(img == null) return;
-        int black = 0;
-        int white = 0;
+
         codewidth = new ArrayList<>();
         codecolor = new ArrayList<>();
         codecount = new HashMap<String, Integer>();
         for(int y =0;y < height; y++)
         {
+            int black = 0;
+            int white = 0;
             for(int x =0; x< width;x++)
             {
                 int color = img.getRGB(x, y);
@@ -91,15 +93,7 @@ class BarcodeScanner {
                 switch(binary){
                     case 0:
                     if(white > 0){
-                        if(Math.abs(white - 5) <= 2){
-                            white = 5;
-                        }
-                        else if(Math.abs(white - 10) <= 2){
-                            white = 10;
-                        }
-                        else if(Math.abs(white - 15) <= 2){
-                            white = 15;
-                        }
+                        white = averageColorWidth(white);//Average of barcode width is 5 px per unit
                         codewidth.add(white);
                         codecolor.add(0);
                         white = 0;
@@ -109,15 +103,7 @@ class BarcodeScanner {
                         
                     case 255:
                     if(black > 0){
-                        if(Math.abs(black - 5) <= 2){
-                            black = 5;
-                        }
-                        else if(Math.abs(black - 10) <= 2){
-                            black = 10;
-                        }
-                        else if(Math.abs(black - 15) <= 2){
-                            black = 15;
-                        }
+                        black = averageColorWidth(black);
                         codewidth.add(black);
                         codecolor.add(1);
                         black = 0;
@@ -127,40 +113,24 @@ class BarcodeScanner {
                 }
             }
             if(white > 0){
-                if(Math.abs(white - 5) <= 2){
-                    white = 5;
-                }
-                else if(Math.abs(white - 10) <= 2){
-                    white = 10;
-                }
-                else if(Math.abs(white - 15) <= 2){
-                    white = 15;
-                }
+                white = averageColorWidth(white);
                 codewidth.add(white);
                 codecolor.add(0);
                 white = 0;
             }
             else if(black > 0){
-                if(Math.abs(black - 5) <= 2){
-                    black = 5;
-                }
-                else if(Math.abs(black - 10) <= 2){
-                    black = 10;
-                }
-                else if(Math.abs(black - 15) <= 2){
-                    black = 15;
-                }
+                black = averageColorWidth(black);
                 codewidth.add(black);
                 codecolor.add(1);
                 black = 0;
             }
-            if (codecolor.size() > 63)
+
+            if (codecolor.size() > 6)//Barcode strip should have more than 6 strip
             {
                 StringBuilder code = new StringBuilder();
                 boolean x = false;
                 for(int i = 0; i < codewidth.size() - 3; i++)
                 {
-                    
                     code.setLength(0);
                     if (codewidth.get(i) == 10 && codecolor.get(i) == 1)
                     {
@@ -216,7 +186,7 @@ class BarcodeScanner {
                                     }
                                     
                                 }
-                                if (code.length() > 0)
+                                if (code.length() > 8)//Barcode are should more than 8 character
                                 {
 
                                     StringBuilder stopcode = new StringBuilder();
@@ -261,40 +231,67 @@ class BarcodeScanner {
     public void scanCode()
     {
         barcodeTable();
-        StringBuilder decodecode = new StringBuilder("");
-        codecount.forEach((key, value) -> {
-            StringBuilder code = new StringBuilder(key);          
-            if(code.length() > 100)
+        StringBuilder decodechar = new StringBuilder("");
+        codecount.forEach((key, value) -> {         
+            StringBuilder code = new StringBuilder(key);
+            System.out.println("Possible code: "+code+" found: "+value+" size: "+code.length());   
+            code.delete(0, 4);
+            code.delete(code.length() - 4, code.length());
+            if(code.length() % 11 == 0)
             {
-                code.delete(0, 4);
-                code.delete(code.length() - 4, code.length());
-                if(code.length() % 11 == 0)
+                StringBuilder charcode = new StringBuilder("");
+                for(int d = 0; d < code.length(); d++)
                 {
-                    StringBuilder charcode = new StringBuilder("");
-                    for(int d = 0; d < code.length(); d++)
+                    
+                    if(charcode.length() == 11)
                     {
-                        
-                        if(charcode.length() == 11)
+                        boolean foundchar = false;
+                        for(int i = 0; i< barcodetable.length; i++)
                         {
-                            for(int i = 0; i< barcodetable.length; i++)
+                            if(charcode.toString().equals(barcodetable[i][1]))
                             {
-                                if(charcode.toString().equals(barcodetable[i][1]))
-                                {
-                                    decodecode.append(barcodetable[i][0]);
-                                }
+                                decodechar.append(barcodetable[i][0]);
+                                foundchar = true;
                             }
-                            charcode.setLength(0);
-                            charcode.append(code.charAt(d));
                         }
-                        else 
+                        if(!foundchar)
                         {
-                            charcode.append(code.charAt(d));
+                            System.out.println("Find status:: "+foundchar);
+                            decodechar.setLength(0);
+                            break;
                         }
+                        charcode.setLength(0);
+                        charcode.append(code.charAt(d));
+                        foundcode = code.toString();
+                    }
+                    else 
+                    {
+                        charcode.append(code.charAt(d));
                     }
                 }
+                System.out.println("Find status: true");
             }
+            else System.out.println("Find status: false");
+            System.out.println();
+        
         });
-        System.out.println("GM Code is "+decodecode);
+        System.out.println("Barcode code is "+foundcode);
+        System.out.println("GM Code is "+decodechar);
+    }
+
+    public int averageColorWidth(int colorwidth)
+    {
+        //Average of barcode width is 5 px per unit
+        if(Math.abs(colorwidth - 5) <= 2){
+            colorwidth = 5;
+        }
+        else if(Math.abs(colorwidth - 10) <= 2){
+            colorwidth = 10;
+        }
+        else if(Math.abs(colorwidth - 15) <= 2){
+            colorwidth = 15;
+        }
+        return colorwidth;
     }
 
     public void convertTobinary(){
@@ -312,7 +309,6 @@ class BarcodeScanner {
             }
         }
     }
-
 
     public Map<String, Integer> sortByValue(Map<String, Integer> wordCounts) {
         return wordCounts.entrySet()
