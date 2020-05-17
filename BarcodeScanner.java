@@ -1,6 +1,4 @@
-import java.nio.Buffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,12 +14,12 @@ import java.lang.Math;
 
 
 class BarcodeScanner {
-    public int width;
-    public int height;
-    public int bitdept;
+    private int width;
+    private int height;
+    private int bitdept;
 
-    public String foundcode;
-    public String[][] barcodetable;
+    private String foundcode;
+    private String[][] barcodetable;
     private List<Integer> codewidth;
     private List<Integer> codecolor;
     private Map<String, Integer> codecount;
@@ -128,7 +126,6 @@ class BarcodeScanner {
             if (codecolor.size() > 6)//Barcode strip should have more than 6 strip
             {
                 StringBuilder code = new StringBuilder();
-                boolean x = false;
                 for(int i = 0; i < codewidth.size() - 3; i++)
                 {
                     code.setLength(0);
@@ -146,7 +143,6 @@ class BarcodeScanner {
                                 }
                                 for(int c = i+3; c < codewidth.size(); c++)
                                 {
-                                     x = true;
                                     if(!(codewidth.get(c) == 5 || codewidth.get(c) == 10 || codewidth.get(c) == 15))
                                     {
                                         break;
@@ -228,10 +224,11 @@ class BarcodeScanner {
         codecount = sortByValue(codecount);
     }
 
-    public void scanCode()
+    public Map<String,String> scanCode()
     {
         barcodeTable();
         StringBuilder decodechar = new StringBuilder("");
+        Map<String,String> decodedlist = new HashMap<String,String>(); 
         codecount.forEach((key, value) -> {         
             StringBuilder code = new StringBuilder(key);
             System.out.println("Possible code: "+code+" found: "+value+" size: "+code.length());   
@@ -240,12 +237,13 @@ class BarcodeScanner {
             if(code.length() % 11 == 0)
             {
                 StringBuilder charcode = new StringBuilder("");
+                boolean foundchar = false;
                 for(int d = 0; d < code.length(); d++)
                 {
                     
                     if(charcode.length() == 11)
                     {
-                        boolean foundchar = false;
+                        foundchar = false;
                         for(int i = 0; i< barcodetable.length; i++)
                         {
                             if(charcode.toString().equals(barcodetable[i][1]))
@@ -256,7 +254,6 @@ class BarcodeScanner {
                         }
                         if(!foundchar)
                         {
-                            System.out.println("Find status:: "+foundchar);
                             decodechar.setLength(0);
                             break;
                         }
@@ -269,14 +266,12 @@ class BarcodeScanner {
                         charcode.append(code.charAt(d));
                     }
                 }
-                System.out.println("Find status: true");
+                if(foundchar)
+                    decodedlist.put(key, decodechar.toString());
             }
-            else System.out.println("Find status: false");
-            System.out.println();
-        
         });
-        System.out.println("Barcode code is "+foundcode);
-        System.out.println("GM Code is "+decodechar);
+        return decodedlist;
+        
     }
 
     public int averageColorWidth(int colorwidth)
