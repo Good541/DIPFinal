@@ -7,8 +7,8 @@ class FinalQuest{
         im.findBarcode();
         im.scanCode().forEach((key, value) -> { 
             System.out.println("------------------------------------------------------------------");
-            System.out.println("Barcode found is "+key);
-            System.out.println("Decode character is "+value);
+            System.out.println("Barcode found: "+key);
+            System.out.println("Decoded character is "+value);
         });
     }
 }
