@@ -238,8 +238,8 @@ class BarcodeScanner {
 
     public Map<String,String> scanCode()
     {
-        barcodeTable();//create code array table
-        StringBuilder decodechar = new StringBuilder("");
+        barcodeTable();//create code data table
+        StringBuilder decodedchar = new StringBuilder("");
         Map<String,String> decodedlist = new HashMap<String,String>();//for contain all decoded character from code128
 
         codecount.forEach((key, value) -> {//decode code 128         
@@ -263,20 +263,20 @@ class BarcodeScanner {
                         {
                             if(charcode.toString().equals(barcodetable[i][1]))//if found character from table
                             {
-                                decodechar.append(barcodetable[i][0]);
+                                decodedchar.append(barcodetable[i][0]);
                                 foundchar = true;
                             }
                         }
 
                         if(!foundchar)//if not found character from table
                         {
-                            decodechar.setLength(0);
+                            decodedchar.setLength(0);
                             break;//cancel decode code128
                         }
 
                         charcode.setLength(0);
                         charcode.append(code.charAt(d));
-                        decodedlist.put(key, decodechar.toString());//put decoded character from code128 to map function
+                        decodedlist.put(key, decodedchar.toString());//put decoded character from code128 to map function
                     }
                     else
                     {
