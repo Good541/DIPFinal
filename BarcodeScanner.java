@@ -19,8 +19,6 @@ class BarcodeScanner {
     private int bitdept;
 
     private String[][] barcodetable;
-    private List<Integer> codewidth;
-    private List<Integer> codecolor;
     private Map<String, Integer> codecount;
 
     private BufferedImage img;
@@ -74,12 +72,12 @@ class BarcodeScanner {
     public void findBarcode()
     {
         if(img == null) return;
-
-        codewidth = new ArrayList<>();
-        codecolor = new ArrayList<>();
+        
         codecount = new HashMap<String, Integer>();
         for(int y =0;y < height; y++)
         {
+            List<Integer> codewidth = new ArrayList<>();
+            List<Integer> codecolor = new ArrayList<>();
             int black = 0;
             int white = 0;
             for(int x =0; x< width;x++)//find color width from image
@@ -228,9 +226,6 @@ class BarcodeScanner {
                     } 
                 }
             }
-
-            codewidth.removeAll(codewidth);
-            codecolor.removeAll(codecolor); 
         }
 
         codecount = sortByValue(codecount);//sort by maximum number of code was found
@@ -316,6 +311,62 @@ class BarcodeScanner {
                 binary = binary < 127? 0: 255;
                 color = (binary << 16) | (binary << 8) | binary;
                 img.setRGB(x,y, color);
+            }
+        }
+    }
+
+    public void medianFilter(int size)
+    {
+        if (img == null) return;
+        if (size % 2 == 0)
+        {
+            System.out.println("Size Invalid: must be odd number!");
+            return;
+        }
+        BufferedImage tempBuf = new BufferedImage(width, height, img.getType());
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int[] red = new int[size*size];
+                int[] green = new int[size*size];
+                int[] blue = new int[size*size];
+                int redMedian = 0;
+                int greenMedian = 0;
+                int blueMedian = 0;
+                int count = 0;
+                for (int i = y - size/2; i <= y + size/2; i++)
+                {
+                    for (int j = x - size/2; j <= x + size/2; j++)
+                    {
+                        if (i >= 0 && i < height && j >= 0 && j < width)
+                        {
+                            int color = img.getRGB(j, i);
+                            int r = (color >> 16) & 0xff;
+                            int g = (color >> 8) & 0xff;
+                            int b = color & 0xff;
+                            red[count] = r;
+                            green[count] = g;
+                            blue[count] = b;
+                            count++;
+                        }
+                    }
+                }
+                java.util.Arrays.sort(red);
+                java.util.Arrays.sort(green);
+                java.util.Arrays.sort(blue);
+                redMedian = red[red.length/2];
+                greenMedian = green[green.length/2];
+                blueMedian = blue[blue.length/2];
+                int newColor = (redMedian << 16) | (greenMedian << 8) | blueMedian;
+                tempBuf.setRGB(x, y, newColor);
+            }
+        }
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                img.setRGB(x, y, tempBuf.getRGB(x, y));
             }
         }
     }
