@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FileWriter;
@@ -12,14 +11,12 @@ import java.io.IOException;
 import java.awt.image.BufferedImage;
 import java.lang.Math;
 
-
 class BarcodeScanner {
     private int width;
     private int height;
     private int bitdept;
 
-    //private String[][] barcodetable;
-    private Map<String, String> codetable;
+    private Map<String, String> barcodetable;
     private Map<String, Integer> codecount;
 
     private BufferedImage img;
@@ -32,22 +29,17 @@ class BarcodeScanner {
             width = img.getWidth();
             height = img.getHeight();
             bitdept = img.getColorModel().getPixelSize(); 
-
-
             origin = new BufferedImage(width,height, img.getType());
             for (int y =0; y < height; y++){
                 for(int x =0; x< width; x++){
                     origin.setRGB(x,y, img.getRGB(x, y));
                 }
-
             }
             return true;
         } catch (IOException e) {
             //TODO: handle exception
             return false;
         }
-        
-
     }
 
     public void findBarcode()
@@ -183,12 +175,10 @@ class BarcodeScanner {
                                     codecount.put(code.toString(), 1);
                                 else
                                 {
-                                    List<String> keys = new ArrayList<String>(codecount.keySet());
                                     boolean found = false;
-
-                                    for (int m = 0; m < keys.size(); m++)//find same code in map function
+                                    for (Map.Entry<String, Integer> key : codecount.entrySet())
                                     {
-                                        if(keys.get(m).toString().equals(code.toString()))//if found same code in map function
+                                        if(key.getValue().toString().equals(code.toString()))//if found same code in map function
                                         {
                                             codecount.put(code.toString(), codecount.get(code.toString()) + 1);//add number of code was found
                                             found = true;
@@ -233,7 +223,7 @@ class BarcodeScanner {
                     if(charcode.length() == 11)
                     {
                         boolean foundchar = false;
-                        for (Map.Entry<String, String> table : codetable.entrySet()) {
+                        for (Map.Entry<String, String> table : barcodetable.entrySet()) {
                             if(charcode.toString().equals(table.getValue()))//if found character from table
                             {
                                 decodedchar.append(table.getKey());
@@ -241,7 +231,6 @@ class BarcodeScanner {
                                 break;
                             }
                         }
-
 
                         if(!foundchar)//if not found character from table
                         {
@@ -304,70 +293,70 @@ class BarcodeScanner {
     }
 
     public void barcodeTable(){
-        codetable = new HashMap<>();
-        codetable.put(" ", "11011001100");//0
-        codetable.put("!", "11001101100");//1
-        codetable.put("\"", "11001100110");//2
-        codetable.put("#", "10010011000");//3
-        codetable.put("$", "10010001100");//4
-        codetable.put("%", "10001001100");//5
-        codetable.put("&", "10011001000");//6
-        codetable.put("'", "10011000100");//7
-        codetable.put("(", "10001100100");//8
-        codetable.put(")", "11001001000");//9
-        codetable.put("*", "11001000100");//10
-        codetable.put("+", "11000100100");//11
-        codetable.put(",", "10110011100");//12
-        codetable.put("-", "10011011100");//13
-        codetable.put(".", "10011001110");//14
-        codetable.put("/", "10111001100");//15
-        codetable.put("0", "10011101100");//16
-        codetable.put("1", "10011100110");//17
-        codetable.put("2", "11001110010");//18
-        codetable.put("3", "11001011100");//19
-        codetable.put("4", "11001001110");//20
-        codetable.put("5", "11011100100");//21
-        codetable.put("6", "11001110100");//22
-        codetable.put("7", "11101101110");//23
-        codetable.put("8", "11101001100");//24
-        codetable.put("9", "11100101100");//25
-        codetable.put(":", "11100100110");//26
-        codetable.put(";", "11101100100");//27
-        codetable.put("<", "11100110100");//28
-        codetable.put("=", "11100110010");//29
-        codetable.put(">", "11011011000");//30
-        codetable.put("?", "11011000110");//31
-        codetable.put("@", "11000110110");//32
-        codetable.put("A", "10100011000");//33
-        codetable.put("B", "10001011000");//34
-        codetable.put("C", "10001000110");//35
-        codetable.put("D", "10110001000");//36
-        codetable.put("E", "10001101000");//37
-        codetable.put("F", "10001100010");//38
-        codetable.put("G", "11010001000");//39
-        codetable.put("H", "11000101000");//40
-        codetable.put("I", "11000100010");//41
-        codetable.put("J", "10110111000");//42
-        codetable.put("K", "10110001110");//43
-        codetable.put("L", "10001101110");//44
-        codetable.put("M", "10111011000");//45
-        codetable.put("N", "10111000110");//46
-        codetable.put("O", "10001110110");//47
-        codetable.put("P", "11101110110");//48
-        codetable.put("Q", "11010001110");//49
-        codetable.put("R", "11000101110");//50
-        codetable.put("S", "11011101000");//51
-        codetable.put("T", "11011100010");//52
-        codetable.put("U", "11011101110");//53
-        codetable.put("V", "11101011000");//54
-        codetable.put("W", "11101000110");//55
-        codetable.put("X", "11100010110");//56
-        codetable.put("Y", "11101101000");//57
-        codetable.put("Z", "11101100010");//58
-        codetable.put("[", "11100011010");//59
-        codetable.put("\\", "11101111010");//60
-        codetable.put("]", "11001000010");//61
-        codetable.put("^", "11110001010");//62
-        codetable.put("_", "10100110000");//63 
+        barcodetable = new HashMap<>();
+        barcodetable.put(" ", "11011001100");//0
+        barcodetable.put("!", "11001101100");//1
+        barcodetable.put("\"", "11001100110");//2
+        barcodetable.put("#", "10010011000");//3
+        barcodetable.put("$", "10010001100");//4
+        barcodetable.put("%", "10001001100");//5
+        barcodetable.put("&", "10011001000");//6
+        barcodetable.put("'", "10011000100");//7
+        barcodetable.put("(", "10001100100");//8
+        barcodetable.put(")", "11001001000");//9
+        barcodetable.put("*", "11001000100");//10
+        barcodetable.put("+", "11000100100");//11
+        barcodetable.put(",", "10110011100");//12
+        barcodetable.put("-", "10011011100");//13
+        barcodetable.put(".", "10011001110");//14
+        barcodetable.put("/", "10111001100");//15
+        barcodetable.put("0", "10011101100");//16
+        barcodetable.put("1", "10011100110");//17
+        barcodetable.put("2", "11001110010");//18
+        barcodetable.put("3", "11001011100");//19
+        barcodetable.put("4", "11001001110");//20
+        barcodetable.put("5", "11011100100");//21
+        barcodetable.put("6", "11001110100");//22
+        barcodetable.put("7", "11101101110");//23
+        barcodetable.put("8", "11101001100");//24
+        barcodetable.put("9", "11100101100");//25
+        barcodetable.put(":", "11100100110");//26
+        barcodetable.put(";", "11101100100");//27
+        barcodetable.put("<", "11100110100");//28
+        barcodetable.put("=", "11100110010");//29
+        barcodetable.put(">", "11011011000");//30
+        barcodetable.put("?", "11011000110");//31
+        barcodetable.put("@", "11000110110");//32
+        barcodetable.put("A", "10100011000");//33
+        barcodetable.put("B", "10001011000");//34
+        barcodetable.put("C", "10001000110");//35
+        barcodetable.put("D", "10110001000");//36
+        barcodetable.put("E", "10001101000");//37
+        barcodetable.put("F", "10001100010");//38
+        barcodetable.put("G", "11010001000");//39
+        barcodetable.put("H", "11000101000");//40
+        barcodetable.put("I", "11000100010");//41
+        barcodetable.put("J", "10110111000");//42
+        barcodetable.put("K", "10110001110");//43
+        barcodetable.put("L", "10001101110");//44
+        barcodetable.put("M", "10111011000");//45
+        barcodetable.put("N", "10111000110");//46
+        barcodetable.put("O", "10001110110");//47
+        barcodetable.put("P", "11101110110");//48
+        barcodetable.put("Q", "11010001110");//49
+        barcodetable.put("R", "11000101110");//50
+        barcodetable.put("S", "11011101000");//51
+        barcodetable.put("T", "11011100010");//52
+        barcodetable.put("U", "11011101110");//53
+        barcodetable.put("V", "11101011000");//54
+        barcodetable.put("W", "11101000110");//55
+        barcodetable.put("X", "11100010110");//56
+        barcodetable.put("Y", "11101101000");//57
+        barcodetable.put("Z", "11101100010");//58
+        barcodetable.put("[", "11100011010");//59
+        barcodetable.put("\\", "11101111010");//60
+        barcodetable.put("]", "11001000010");//61
+        barcodetable.put("^", "11110001010");//62
+        barcodetable.put("_", "10100110000");//63 
     }
 }
