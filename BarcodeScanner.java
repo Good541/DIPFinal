@@ -155,8 +155,16 @@ class BarcodeScanner {
                                     code.append("111");
                                 }
                                 break;
+
+                                case 20://if color width is 15
+                                if(codecolor.get(c) == 0){//if color is white
+                                    code.append("0000");
+                                }
+                                else if(codecolor.get(c) == 1){//if color is black
+                                    code.append("1111");
+                                }
+                                break;
                             }
-                            
                         }
 
                         if (code.length() > 8)//code character should more than 8 character
@@ -264,6 +272,9 @@ class BarcodeScanner {
         }
         else if(Math.abs(colorwidth - 15) <= 2){
             colorwidth = 15;
+        }
+        else if(Math.abs(colorwidth - 20) <= 2){
+            colorwidth = 20;
         }
         return colorwidth;
     }
