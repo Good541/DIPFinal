@@ -3,7 +3,6 @@ class FinalQuest{
         BarcodeScanner im = new BarcodeScanner();
         im.read("images/Mission_5.bmp");
         im.convertTobinary();
-        im.write("images/binary.bmp");
         im.findBarcode();
         im.scanCode().forEach((key, value) -> { 
             System.out.println("------------------------------------------------------------------");

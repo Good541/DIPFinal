@@ -18,7 +18,8 @@ class BarcodeScanner {
     private int height;
     private int bitdept;
 
-    private String[][] barcodetable;
+    //private String[][] barcodetable;
+    private Map<String, String> codetable;
     private Map<String, Integer> codecount;
 
     private BufferedImage img;
@@ -47,26 +48,6 @@ class BarcodeScanner {
         }
         
 
-    }
-    public boolean write(String fileName){
-        try {
-            ImageIO.write(img, "bmp", new File(fileName));
-            return true;
-        } catch (IOException e) {
-            //TODO: handle exception
-            return false;
-        }
-        catch(NullPointerException e){
-            return false;
-        }
-    }
-    public void restore()
-    {
-        for(int y = 0; y< height ;y++){
-            for(int x = 0; x < width ;x++){
-                img.setRGB(x,y , origin.getRGB(x,y));
-            }
-        }
     }
 
     public void findBarcode()
@@ -252,15 +233,15 @@ class BarcodeScanner {
                     if(charcode.length() == 11)
                     {
                         boolean foundchar = false;
-
-                        for(int i = 0; i< barcodetable.length; i++)//find character from table
-                        {
-                            if(charcode.toString().equals(barcodetable[i][1]))//if found character from table
+                        for (Map.Entry<String, String> table : codetable.entrySet()) {
+                            if(charcode.toString().equals(table.getValue()))//if found character from table
                             {
-                                decodedchar.append(barcodetable[i][0]);
+                                decodedchar.append(table.getKey());
                                 foundchar = true;
+                                break;
                             }
                         }
+
 
                         if(!foundchar)//if not found character from table
                         {
@@ -314,62 +295,6 @@ class BarcodeScanner {
         }
     }
 
-    public void medianFilter(int size)
-    {
-        if (img == null) return;
-        if (size % 2 == 0)
-        {
-            System.out.println("Size Invalid: must be odd number!");
-            return;
-        }
-        BufferedImage tempBuf = new BufferedImage(width, height, img.getType());
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                int[] red = new int[size*size];
-                int[] green = new int[size*size];
-                int[] blue = new int[size*size];
-                int redMedian = 0;
-                int greenMedian = 0;
-                int blueMedian = 0;
-                int count = 0;
-                for (int i = y - size/2; i <= y + size/2; i++)
-                {
-                    for (int j = x - size/2; j <= x + size/2; j++)
-                    {
-                        if (i >= 0 && i < height && j >= 0 && j < width)
-                        {
-                            int color = img.getRGB(j, i);
-                            int r = (color >> 16) & 0xff;
-                            int g = (color >> 8) & 0xff;
-                            int b = color & 0xff;
-                            red[count] = r;
-                            green[count] = g;
-                            blue[count] = b;
-                            count++;
-                        }
-                    }
-                }
-                java.util.Arrays.sort(red);
-                java.util.Arrays.sort(green);
-                java.util.Arrays.sort(blue);
-                redMedian = red[red.length/2];
-                greenMedian = green[green.length/2];
-                blueMedian = blue[blue.length/2];
-                int newColor = (redMedian << 16) | (greenMedian << 8) | blueMedian;
-                tempBuf.setRGB(x, y, newColor);
-            }
-        }
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                img.setRGB(x, y, tempBuf.getRGB(x, y));
-            }
-        }
-    }
-
     //sort function
     public Map<String, Integer> sortByValue(Map<String, Integer> wordCounts) {
         return wordCounts.entrySet()
@@ -379,72 +304,70 @@ class BarcodeScanner {
     }
 
     public void barcodeTable(){
-        barcodetable = new String[][]
-        {
-            {" ","11011001100"},//0
-            {"!","11001101100"},//1
-            {"\"","11001100110"},//2
-            {"#","10010011000"},//3
-            {"$","10010001100"},//4
-            {"%","10001001100"},//5
-            {"&","10011001000"},//6
-            {"'","10011000100"},//7
-            {"(","10001100100"},//8
-            {")","11001001000"},//9
-            {"*","11001000100"},//10
-            {"+","11000100100"},//11
-            {",","10110011100"},//12
-            {"-","10011011100"},//13
-            {".","10011001110"},//14
-            {"/","10111001100"},//15
-            {"0","10011101100"},//16
-            {"1","10011100110"},//17
-            {"2","11001110010"},//18
-            {"3","11001011100"},//19
-            {"4","11001001110"},//20
-            {"5","11011100100"},//21
-            {"6","11001110100"},//22
-            {"7","11101101110"},//23
-            {"8","11101001100"},//24
-            {"9","11100101100"},//25
-            {":","11100100110"},//26
-            {";","11101100100"},//27
-            {"<","11100110100"},//28
-            {"=","11100110010"},//29
-            {">","11011011000"},//30
-            {"?","11011000110"},//31
-            {"@","11000110110"},//22
-            {"A","10100011000"},//33
-            {"B","10001011000"},//34
-            {"C","10001000110"},//35
-            {"D","10110001000"},//36
-            {"E","10001101000"},//37
-            {"F","10001100010"},//38
-            {"G","11010001000"},//39
-            {"H","11000101000"},//40
-            {"I","11000100010"},//41
-            {"J","10110111000"},//42
-            {"K","10110001110"},//43
-            {"L","10001101110"},//44
-            {"M","10111011000"},//45
-            {"N","10111000110"},//46
-            {"O","10001110110"},//47
-            {"P","11101110110"},//48
-            {"Q","11010001110"},//49
-            {"R","11000101110"},//50
-            {"S","11011101000"},//51
-            {"T","11011100010"},//52
-            {"U","11011101110"},//53
-            {"V","11101011000"},//54
-            {"W","11101000110"},//55
-            {"X","11100010110"},//56
-            {"Y","11101101000"},//57
-            {"Z","11101100010"},//58
-            {"[","11100011010"},//59
-            {"\\","11101111010"},//60
-            {"]","11001000010"},//61
-            {"^","11110001010"},//62
-            {"_","10100110000"},//63
-        };
+        codetable = new HashMap<>();
+        codetable.put(" ", "11011001100");//0
+        codetable.put("!", "11001101100");//1
+        codetable.put("\"", "11001100110");//2
+        codetable.put("#", "10010011000");//3
+        codetable.put("$", "10010001100");//4
+        codetable.put("%", "10001001100");//5
+        codetable.put("&", "10011001000");//6
+        codetable.put("'", "10011000100");//7
+        codetable.put("(", "10001100100");//8
+        codetable.put(")", "11001001000");//9
+        codetable.put("*", "11001000100");//10
+        codetable.put("+", "11000100100");//11
+        codetable.put(",", "10110011100");//12
+        codetable.put("-", "10011011100");//13
+        codetable.put(".", "10011001110");//14
+        codetable.put("/", "10111001100");//15
+        codetable.put("0", "10011101100");//16
+        codetable.put("1", "10011100110");//17
+        codetable.put("2", "11001110010");//18
+        codetable.put("3", "11001011100");//19
+        codetable.put("4", "11001001110");//20
+        codetable.put("5", "11011100100");//21
+        codetable.put("6", "11001110100");//22
+        codetable.put("7", "11101101110");//23
+        codetable.put("8", "11101001100");//24
+        codetable.put("9", "11100101100");//25
+        codetable.put(":", "11100100110");//26
+        codetable.put(";", "11101100100");//27
+        codetable.put("<", "11100110100");//28
+        codetable.put("=", "11100110010");//29
+        codetable.put(">", "11011011000");//30
+        codetable.put("?", "11011000110");//31
+        codetable.put("@", "11000110110");//32
+        codetable.put("A", "10100011000");//33
+        codetable.put("B", "10001011000");//34
+        codetable.put("C", "10001000110");//35
+        codetable.put("D", "10110001000");//36
+        codetable.put("E", "10001101000");//37
+        codetable.put("F", "10001100010");//38
+        codetable.put("G", "11010001000");//39
+        codetable.put("H", "11000101000");//40
+        codetable.put("I", "11000100010");//41
+        codetable.put("J", "10110111000");//42
+        codetable.put("K", "10110001110");//43
+        codetable.put("L", "10001101110");//44
+        codetable.put("M", "10111011000");//45
+        codetable.put("N", "10111000110");//46
+        codetable.put("O", "10001110110");//47
+        codetable.put("P", "11101110110");//48
+        codetable.put("Q", "11010001110");//49
+        codetable.put("R", "11000101110");//50
+        codetable.put("S", "11011101000");//51
+        codetable.put("T", "11011100010");//52
+        codetable.put("U", "11011101110");//53
+        codetable.put("V", "11101011000");//54
+        codetable.put("W", "11101000110");//55
+        codetable.put("X", "11100010110");//56
+        codetable.put("Y", "11101101000");//57
+        codetable.put("Z", "11101100010");//58
+        codetable.put("[", "11100011010");//59
+        codetable.put("\\", "11101111010");//60
+        codetable.put("]", "11001000010");//61
+        codetable.put("^", "11110001010");//62
+        codetable.put("_", "10100110000");//63 
     }
 }
