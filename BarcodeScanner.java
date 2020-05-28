@@ -45,8 +45,10 @@ class BarcodeScanner {
     public void findBarcode()
     {
         if(img == null) return;
-        
+
+        convertTobinary();// convert image to binary
         codecount = new HashMap<String, Integer>();
+        
         for(int y =0;y < height; y++)
         {
             List<Integer> codewidth = new ArrayList<>();
@@ -57,9 +59,7 @@ class BarcodeScanner {
             {
                 int color = img.getRGB(x, y);
                 int r = (color >> 16)& 0xff;
-                int g = (color >> 8)& 0xff;
-                int b = color & 0xff;
-                int binary = (r+g+b)/3;
+                int binary = r;
                 switch(binary)
                 {
                     case 0://if color is black
