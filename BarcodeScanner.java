@@ -217,7 +217,7 @@ class BarcodeScanner {
 
         codecount.forEach((key, value) -> {//decode code128         
             StringBuilder code = new StringBuilder(key);
-            System.out.println("Possible code: "+code+" found: "+value+" size: "+code.length());   
+            //System.out.println("Possible code: "+code+" found: "+value+" size: "+code.length());//debug   
             code.delete(0, 4);//cut start code
             code.delete(code.length() - 4, code.length());//cut stop code
 
