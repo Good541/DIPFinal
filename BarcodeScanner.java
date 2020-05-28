@@ -48,7 +48,7 @@ class BarcodeScanner {
 
         convertTobinary();// convert image to binary
         codecount = new HashMap<String, Integer>();
-        
+
         for(int y =0;y < height; y++)
         {
             List<Integer> codewidth = new ArrayList<>();
@@ -122,7 +122,7 @@ class BarcodeScanner {
 
                         for(int c = i+3; c < codewidth.size(); c++)//convert width to code128 
                         {
-                            if(!(codewidth.get(c) == 5 || codewidth.get(c) == 10 || codewidth.get(c) == 15))//if not a barcode width
+                            if(!(codewidth.get(c) == 5 || codewidth.get(c) == 10 || codewidth.get(c) == 15 || codewidth.get(c) == 20))//if not a barcode width
                             {
                                 break;//stop convert color width to code128
                             }
@@ -156,7 +156,7 @@ class BarcodeScanner {
                                 }
                                 break;
 
-                                case 20://if color width is 15
+                                case 20://if color width is 20
                                 if(codecolor.get(c) == 0){//if color is white
                                     code.append("0000");
                                 }
@@ -217,7 +217,7 @@ class BarcodeScanner {
 
         codecount.forEach((key, value) -> {//decode code128         
             StringBuilder code = new StringBuilder(key);
-            //System.out.println("Possible code: "+code+" found: "+value+" size: "+code.length());//debug   
+            //System.out.println("Possible code: "+code+" found: "+value+" size: "+code.length()); //debug   
             code.delete(0, 4);//cut start code
             code.delete(code.length() - 4, code.length());//cut stop code
 
